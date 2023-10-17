@@ -1,0 +1,388 @@
+-- tables
+-- Table: Adres
+CREATE TABLE Adres (
+    ID int  NOT NULL,
+    Ulica varchar(30)  NOT NULL,
+    Numer int  NOT NULL,
+    Miasto varchar(30)  NOT NULL,
+    CONSTRAINT Adres_pk PRIMARY KEY  (ID)
+);
+
+-- Table: Bukiet
+CREATE TABLE Bukiet (
+    ID int  NOT NULL,
+    CenaBukietu int  NOT NULL,
+    CONSTRAINT Bukiet_pk PRIMARY KEY  (ID)
+);
+
+-- Table: Klient
+CREATE TABLE Klient (
+    ID int  NOT NULL,
+    Imie varchar(30)  NOT NULL,
+    Nazwisko varchar(30)  NOT NULL,
+    NrTel int  NOT NULL,
+    email varchar(30)  NOT NULL,
+    Adres_ID int  NOT NULL,
+    CONSTRAINT Klient_pk PRIMARY KEY  (ID)
+);
+
+-- Table: KodRabatowy
+CREATE TABLE KodRabatowy (
+    ID int  NOT NULL,
+    kod_rabatowy varchar(7)  NOT NULL,
+    procent_znizki numeric(30,0)  NOT NULL,
+    data_waznosci date  NOT NULL,
+    CONSTRAINT KodRabatowy_pk PRIMARY KEY  (ID)
+);
+
+-- Table: Kwiat
+CREATE TABLE Kwiat (
+    ID int  NOT NULL,
+    Gatunek varchar(30)  NOT NULL,
+    Cena int  NOT NULL,
+    CONSTRAINT Kwiat_pk PRIMARY KEY  (ID)
+);
+
+-- Table: Kwiat_Bukiet
+CREATE TABLE Kwiat_Bukiet (
+    Kwiat_ID int  NOT NULL,
+    Bukiet_ID int  NOT NULL,
+    CenaKwiatuWBukiecie int  NOT NULL,
+    CONSTRAINT Kwiat_Bukiet_pk PRIMARY KEY  (Kwiat_ID,Bukiet_ID)
+);
+
+-- Table: Kwiat_Zestaw
+CREATE TABLE Kwiat_Zestaw (
+    Zestaw_ID int  NOT NULL,
+    Kwiat_ID int  NOT NULL,
+    CenaKwiatuWZestawie int  NOT NULL,
+    CONSTRAINT Kwiat_Zestaw_pk PRIMARY KEY  (Zestaw_ID,Kwiat_ID)
+);
+
+-- Table: Zamowienie
+CREATE TABLE Zamowienie (
+    ID int  NOT NULL,
+    Data date  NOT NULL,
+    Klient_ID int  NOT NULL,
+    PrzewidywanaDataRealizacji date  NOT NULL,
+    KodRabatowy_ID int  NOT NULL,
+    CONSTRAINT Zamowienie_pk PRIMARY KEY  (ID)
+);
+
+-- Table: ZamowienieBukiet
+CREATE TABLE ZamowienieBukiet (
+    Zamowienie_ID int  NOT NULL,
+    Bukiet_ID int  NOT NULL,
+    CONSTRAINT ZamowienieBukiet_pk PRIMARY KEY  (Zamowienie_ID,Bukiet_ID)
+);
+
+-- Table: ZamowienieZestaw
+CREATE TABLE ZamowienieZestaw (
+    Zestaw_ID int  NOT NULL,
+    Zamowienie_ID int  NOT NULL,
+    CONSTRAINT ZamowienieZestaw_pk PRIMARY KEY  (Zestaw_ID,Zamowienie_ID)
+);
+
+-- Table: Zestaw
+CREATE TABLE Zestaw (
+    ID int  NOT NULL,
+    Cena_zestawu int  NOT NULL,
+    CONSTRAINT Zestaw_pk PRIMARY KEY  (ID)
+);
+
+-- foreign keys
+-- Reference: Klient_Adres (table: Klient)
+ALTER TABLE Klient ADD CONSTRAINT Klient_Adres
+    FOREIGN KEY (Adres_ID)
+    REFERENCES Adres (ID);
+
+-- Reference: Kwiat_Bukiet_Bukiet (table: Kwiat_Bukiet)
+ALTER TABLE Kwiat_Bukiet ADD CONSTRAINT Kwiat_Bukiet_Bukiet
+    FOREIGN KEY (Bukiet_ID)
+    REFERENCES Bukiet (ID);
+
+-- Reference: Kwiat_Bukiet_Kwiat (table: Kwiat_Bukiet)
+ALTER TABLE Kwiat_Bukiet ADD CONSTRAINT Kwiat_Bukiet_Kwiat
+    FOREIGN KEY (Kwiat_ID)
+    REFERENCES Kwiat (ID);
+
+-- Reference: Kwiat_Zestaw_Kwiat (table: Kwiat_Zestaw)
+ALTER TABLE Kwiat_Zestaw ADD CONSTRAINT Kwiat_Zestaw_Kwiat
+    FOREIGN KEY (Kwiat_ID)
+    REFERENCES Kwiat (ID);
+
+-- Reference: Kwiat_Zestaw_Zestaw (table: Kwiat_Zestaw)
+ALTER TABLE Kwiat_Zestaw ADD CONSTRAINT Kwiat_Zestaw_Zestaw
+    FOREIGN KEY (Zestaw_ID)
+    REFERENCES Zestaw (ID);
+
+-- Reference: ZamowienieBukiet_Bukiet (table: ZamowienieBukiet)
+ALTER TABLE ZamowienieBukiet ADD CONSTRAINT ZamowienieBukiet_Bukiet
+    FOREIGN KEY (Bukiet_ID)
+    REFERENCES Bukiet (ID);
+
+-- Reference: ZamowienieBukiet_Zamowienie (table: ZamowienieBukiet)
+ALTER TABLE ZamowienieBukiet ADD CONSTRAINT ZamowienieBukiet_Zamowienie
+    FOREIGN KEY (Zamowienie_ID)
+    REFERENCES Zamowienie (ID);
+
+-- Reference: ZamowienieZestaw_Zamowienie (table: ZamowienieZestaw)
+ALTER TABLE ZamowienieZestaw ADD CONSTRAINT ZamowienieZestaw_Zamowienie
+    FOREIGN KEY (Zamowienie_ID)
+    REFERENCES Zamowienie (ID);
+
+-- Reference: ZamowienieZestaw_Zestaw (table: ZamowienieZestaw)
+ALTER TABLE ZamowienieZestaw ADD CONSTRAINT ZamowienieZestaw_Zestaw
+    FOREIGN KEY (Zestaw_ID)
+    REFERENCES Zestaw (ID);
+
+-- Reference: Zamowienie_Klient (table: Zamowienie)
+ALTER TABLE Zamowienie ADD CONSTRAINT Zamowienie_Klient
+    FOREIGN KEY (Klient_ID)
+    REFERENCES Klient (ID);
+
+-- Reference: Zamowienie_KodRabatowy (table: Zamowienie)
+ALTER TABLE Zamowienie ADD CONSTRAINT Zamowienie_KodRabatowy
+    FOREIGN KEY (KodRabatowy_ID)
+    REFERENCES KodRabatowy (ID);
+
+-- End of file.
+
+insert into Adres (ID, Ulica, Numer, Miasto) values (1, 'Aleje Jerozolimskie', '100', 'Warszawa');
+insert into Adres (ID, Ulica, Numer, Miasto) values (2, 'Ko?ciuszki', '12', 'Kraków');
+insert into Adres (ID, Ulica, Numer, Miasto) values (3, 'Piotrkowska', '35', 'Lódz');
+insert into Adres (ID, Ulica, Numer, Miasto) values (4, 'Gdanska', '25', 'Gda?sk');
+insert into Adres (ID, Ulica, Numer, Miasto) values (5, 'Karmelicka', '22', 'Kraków');
+insert into Adres (ID, Ulica, Numer, Miasto) values (6, 'Mariacka', '5', 'Katowice');
+insert into Adres (ID, Ulica, Numer, Miasto) values (7, 'Jagiello?ska', '23', 'Lublin');
+insert into Adres (ID, Ulica, Numer, Miasto) values (8, 'Mickiewicza', '10', 'Wroc?aw');
+insert into Adres (ID, Ulica, Numer, Miasto) values (9, 'Armii Krajowej', '67', 'Pozna?');
+insert into Adres (ID, Ulica, Numer, Miasto) values (10, 'Slowackiego', '1', 'Kraków');
+
+INSERT INTO Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID) VALUES (1, 'Jan', 'Kowalski', '555555555', 'jan.kowalski@example.com', 1);
+INSERT INTO Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID)
+VALUES (2, 'Anna', 'Nowak', '666666666', 'anna.nowak@example.com', 2);
+INSERT INTO Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID)
+VALUES (3, 'Piotr', 'Wójcik', '777777777', 'piotr.wojcik@example.com', 3);
+INSERT INTO Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID)
+VALUES (4, 'Magdalena', 'Kaczmarek', '888888888', 'magdalenakaczmarek@example.com', 4);
+INSERT INTO Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID)
+VALUES (5, 'Tomasz', 'Lis', '999999999', 'tomasz.lis@example.com', 5);
+insert into Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID) values (6, 'Anna', 'Kowalska', '123456789', 'anna.kowalska@example.com', 6);
+insert into Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID) values (7, 'Marcin', 'Nowak', '987654321', 'marcin.nowak@example.com', 7);
+insert into Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID) values (8, 'Katarzyna', 'Szyma?ska', '111222333', 'katarzynaszymanska@example.com', 8);
+insert into Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID) values (9, 'Tomasz', 'Kaczmarek', '555444333', 'tomasz.kaczmarek@example.com', 9);
+insert into Klient (ID, Imie, Nazwisko, NrTel, Email, Adres_ID) values (10, 'Karolina', 'Wójcik', '999888777', 'karolina.wojcik@example.com', 10);
+
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci) VALUES (1, 'ABCDEFG', 10, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (2, 'HJKL123', 15, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (3, 'QWERTYU', 20, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (4, 'ZXCVBNM', 10, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (5, 'PLMNKIO', 25, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (6, '1234567', 20, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (7, 'WERTYUI', 30, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (8, 'KJHGFDS', 25, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (9, 'YTREWQ1', 15, '2023-04-30 23:59:59');
+INSERT INTO KodRabatowy (id, kod_rabatowy, procent_znizki, data_waznosci)
+VALUES (10, 'BNMPOIU', 10, '2023-04-30 23:59:59');
+
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(1, '2023-04-20 10:30:00', 1, '2023-04-23 12:00:00', 1);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(2, '2023-04-20 11:45:00', 2, '2023-04-25 15:30:00', 2);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(3, '2023-04-20 13:00:00', 3, '2023-04-24 10:00:00', 3);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(4, '2023-04-20 15:20:00', 4, '2023-04-22 09:45:00', 4);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(5, '2023-04-20 17:30:00', 5, '2023-04-26 14:15:00', 5);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(6, '2023-04-20 19:15:00', 6, '2023-04-23 12:00:00', 6);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(7, '2023-04-20 21:00:00', 7, '2023-04-25 15:30:00', 7);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(8, '2023-04-20 22:45:00', 8, '2023-04-24 10:00:00', 8);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(9, '2023-04-20 23:30:00', 9, '2023-04-22 09:45:00', 9);
+INSERT INTO Zamowienie(ID, Data, klient_id, PrzewidywanaDataRealizacji, KodRabatowy_ID) VALUES(10, '2023-04-21 01:15:00', 10, '2023-04-26 14:15:00', 10);
+
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (1, 50);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (2, 75);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (3, 100);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (4, 120);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (5, 90);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (6, 80);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (7, 110);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (8, 60);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (9, 95);
+INSERT INTO Bukiet (ID, CenaBukietu) VALUES (10, 70);
+
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (1, 50);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (2, 30);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (3, 70);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (4, 25);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (5, 60);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (6, 40);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (7, 80);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (8, 45);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (9, 55);
+INSERT INTO Zestaw (ID, Cena_zestawu) VALUES (10, 65);
+
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (1, 1);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (2, 2);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (3, 3);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (4, 4);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (5, 5);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (6, 6);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (7, 7);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (8, 8);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (9, 9);
+INSERT INTO ZamowienieBukiet (Zamowienie_ID, Bukiet_ID)
+VALUES (10, 10);
+
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (1, 1);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (2, 1);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (5, 1);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (2, 2);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (4, 2);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (6, 2);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (3, 3);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (7, 3);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (4, 4);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (8, 4);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (5, 5);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (9, 5);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (1, 6);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (10, 6);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (2, 7);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (8, 7);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (3, 8);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (9, 8);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (4, 9);
+INSERT INTO ZamowienieZestaw (Zestaw_ID, Zamowienie_ID) VALUES (10, 10);
+
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (1, 'Ró?a', 10);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (2, 'Tulipan', 8);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (3, 'Hiacynt', 12);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (4, 'Stokrotka', 5);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (5, 'Go?dzik', 7);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (6, 'Fio?ek', 9);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (7, 'Chryzantema', 6);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (8, 'Niezapominajka', 11);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (9, 'Mak', 4);
+INSERT INTO Kwiat (ID, Gatunek, Cena) VALUES (10, 'Lilak', 14);
+
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (1, 2, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (1, 4, 5);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (1, 7, 6);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (2, 1, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (2, 3, 12);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (2, 5, 7);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (3, 2, 8);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (3, 6, 9);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (3, 8, 11);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (4, 1, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (4, 2, 8);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (4, 3, 12);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (5, 2, 8);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (5, 4, 5);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (5, 6, 9);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (6, 1, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (6, 5, 7);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (6, 7, 6);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (6, 8, 11);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (7, 2, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (7, 4, 5);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (7, 7, 6);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (7, 1, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (8, 3, 12);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (8, 5, 7);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (8, 2, 8);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (8, 6, 9);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (8, 8, 11);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (9, 1, 10);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (9, 2, 8);
+INSERT INTO Kwiat_Zestaw (Zestaw_ID, Kwiat_ID, CenaKwiatuWZestawie) VALUES (10,3, 12);
+
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (1, 1, 10);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (1, 3, 12);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (1, 5, 7);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (2, 2, 8);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (2, 4, 5);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (2, 6, 9);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (3, 1, 10);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (3, 5, 7);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (3, 7, 6);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (4, 2, 8);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (4, 6, 9);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (4, 8, 11);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (5, 3, 12);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (5, 7, 6);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (5, 9, 4);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (6, 1, 10);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (6, 8, 11);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (6, 10, 14);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (7, 2, 8);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (7, 4, 5);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (8, 2, 8);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (8, 6, 9);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (8, 8, 11);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (9, 3, 12);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (9, 7, 6);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (9, 9, 4);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (10, 1, 10);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (10, 8, 11);
+INSERT INTO Kwiat_Bukiet (Bukiet_ID, Kwiat_ID, CenaKwiatuWBukiecie) VALUES (10, 10, 14);
+
+--PRZYKLADOWE PROSTE ZAPYTANIA
+--Wyswietl wszystkie tabele
+SELECT * FROM Adres;
+SELECT * FROM Klient;
+SELECT * FROM KodRabatowy;
+SELECT * FROM Zamowienie;
+SELECT * FROM ZamowienieBukiet;
+SELECT * FROM ZamowienieZestaw;
+SELECT * FROM Bukiet;
+SELECT * FROM Zestaw;
+SELECT * FROM Kwiat;
+SELECT * FROM Kwiat_Bukiet;
+SELECT * FROM Kwiat_Zestaw;
+
+--Zwrócenie wszystkich wierszy z tabeli Bukiet gdzie CenaBukietu jest więszka od 80:
+SELECT * FROM Bukiet WHERE CenaBukietu >80;
+
+--Zwrócenie kolumny kod_rabatowy z tabeli KodRabatowy:
+SELECT kod_rabatowy FROM KodRabatowy;
+
+--Zwrócenie wierszy z tabeli Zamowienie, gdzie cena bukietu jest mniejsza lub równa 100 złotych:
+SELECT * FROM Zamowienie WHERE ID IN (SELECT Zamowienie_ID FROM ZamowienieBukiet INNER JOIN Bukiet ON ZamowienieBukiet.Bukiet_ID=Bukiet.ID WHERE CenaBukietu<=100);
+
+
+--PRZYKLADOWE PODZAPYTANIA
+--Zwrócenie wierszy z tabeli Kwiat, których cena jest wyższa niż średnia cena kwiatów:
+SELECT * FROM Kwiat WHERE Cena > (SELECT AVG(Cena) FROM Kwiat);
+
+
+--PRZYKLADOWE AGREGACJI
+--Zwrócenie ilości zamówień złożonych przez każdego klienta:
+SELECT Klient.Imie, Klient.Nazwisko, COUNT(Zamowienie.ID) as Ilosc_zamowien
+FROM Klient
+JOIN Zamowienie ON Klient.ID = Zamowienie.Klient_ID
+GROUP BY Klient.Imie, Klient.Nazwisko;
+
+
+
+--PRZYKLADOWE POLECENIA DML:
+--Usunięcie z Kwiat_Bukiet kwiatów gdzie ich cena jest rowna 11:
+DELETE FROM Kwiat_Bukiet WHERE CenaKwiatuWBukiecie = 11;
+
+--Zmiana procentu zniżki dla kodu rabatowego o identyfikatorze ID na 25 w tabeli KodRabatowy
+UPDATE KodRabatowy SET procent_znizki = 25 WHERE ID = 2;

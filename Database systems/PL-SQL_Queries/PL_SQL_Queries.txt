@@ -1,0 +1,157 @@
+--Blok PL/SQL z kursorem + jeden kursor w innymm kursorze i obsługa wyjatkow
+--Wyswietlanie danych klientow i ich zamowien
+----------------------------------------------------------------------------------
+SET SERVEROUTPUT ON;
+
+DECLARE
+  CURSOR c_zamowienia IS
+    SELECT Klient_ID, ID, Data FROM Zamowienie;
+  v_klient_id Zamowienie.Klient_ID%TYPE;
+  v_zamowienie_id Zamowienie.ID%TYPE;
+  v_data Zamowienie.Data%TYPE;
+  
+  CURSOR c_klienci (p_klient_id Zamowienie.Klient_ID%TYPE) IS
+    SELECT Imie, Nazwisko FROM Klient WHERE ID = p_klient_id;
+  v_imie Klient.Imie%TYPE;
+  v_nazwisko Klient.Nazwisko%TYPE;
+BEGIN
+  FOR zamowienie IN c_zamowienia LOOP
+    BEGIN
+      v_klient_id := zamowienie.Klient_ID;
+      v_zamowienie_id := zamowienie.ID;
+      v_data := zamowienie.Data;
+      
+      -- Wewnętrzny kursor
+      FOR klient IN c_klienci(v_klient_id) LOOP
+        BEGIN
+          v_imie := klient.Imie;
+          v_nazwisko := klient.Nazwisko;
+          
+          DBMS_OUTPUT.PUT_LINE('Klient: ' || v_imie || ' ' || v_nazwisko);
+          DBMS_OUTPUT.PUT_LINE(' - Zamówienie ID: ' || v_zamowienie_id || ', Data: ' || v_data);
+        EXCEPTION
+          WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Błąd podczas przetwarzania rekordu klienta.');
+        END;
+      END LOOP;
+      
+    EXCEPTION
+      WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd podczas przetwarzania rekordu zamówienia.');
+    END;
+  END LOOP;
+END;
+
+--Procedura zwracajaca wartosci + obsluga wyjatkow
+--Wyswietlanie zamowien dla danego klienta
+----------------------------------------------------------
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE WyswietlZamowieniaKlienta(p_klient_id IN Klient.ID%TYPE)
+IS
+  CURSOR c_zamowienia (p_klient_id Klient.ID%TYPE) IS
+    SELECT z.ID, z.Data
+    FROM Zamowienie z
+    WHERE z.Klient_ID = p_klient_id;
+  v_zamowienie_id Zamowienie.ID%TYPE;
+  v_data Zamowienie.Data%TYPE;
+BEGIN
+  OPEN c_zamowienia(p_klient_id);
+  
+  LOOP
+    FETCH c_zamowienia INTO v_zamowienie_id, v_data;
+    EXIT WHEN c_zamowienia%NOTFOUND;
+    
+    DBMS_OUTPUT.PUT_LINE('Zamówienie ID: ' || v_zamowienie_id || ', Data: ' || v_data);
+  END LOOP;
+  
+  CLOSE c_zamowienia;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Brak zamówień dla podanego klienta');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Błąd podczas przetwarzania zamówień klienta');
+END;
+/
+
+BEGIN
+  WyswietlZamowieniaKlienta(1);
+END;
+/
+
+
+--Wyzwalacz FOR EACH ROW + obsluga wyjatkow
+--Sprawdza czy przewidywana realizacja zamowienia jest pozniejsza niz data zamowienia 
+-----------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE TRIGGER SprawdzPrzewidywanaDate
+BEFORE INSERT OR UPDATE ON Zamowienie
+FOR EACH ROW
+DECLARE
+  PrzewidywanaDataNiewlasciwa EXCEPTION;
+BEGIN
+  IF :NEW.PrzewidywanaDataRealizacji <= :NEW.Data THEN
+    RAISE PrzewidywanaDataNiewlasciwa;
+  END IF;
+EXCEPTION
+  WHEN PrzewidywanaDataNiewlasciwa THEN
+    RAISE_APPLICATION_ERROR(-20001, 'Przewidywana data realizacji musi być późniejsza niż data zamówienia.');
+  WHEN OTHERS THEN
+    RAISE_APPLICATION_ERROR(-20002, 'Wystąpił błąd podczas dodawania lub modyfikacji zamówienia.');
+END;
+/
+
+--spr
+UPDATE Zamowienie
+SET PrzewidywanaDataRealizacji = SYSTIMESTAMP
+WHERE ID = 1;
+
+--spr bledu
+UPDATE Zamowienie
+SET Data = SYSTIMESTAMP + INTERVAL '1' DAY
+WHERE ID = 1;
+
+
+
+--Funkcja + obsluga wyjatkow, funkcja w SELECT, własny typ danych
+--Zwraca liczbe zamowien dla klienta o podanym ID
+-----------------------------------------------------
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE TYPE OrderCountType AS OBJECT (
+  client_id NUMBER,
+  order_count NUMBER
+);
+/
+
+CREATE OR REPLACE FUNCTION GetOrderCountForClient(p_client_id IN NUMBER) RETURN OrderCountType IS
+  v_order_count NUMBER;
+  v_order_count_type OrderCountType;
+BEGIN
+  SELECT COUNT(*) INTO v_order_count
+  FROM Zamowienie
+  WHERE Klient_ID = p_client_id;
+  
+  v_order_count_type := OrderCountType(p_client_id, v_order_count);
+  
+  RETURN v_order_count_type;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    v_order_count_type := OrderCountType(p_client_id, 0);
+    RETURN v_order_count_type;
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Błąd podczas pobierania liczby zamówień.');
+    RETURN NULL;
+END;
+/
+
+DECLARE
+  v_order_count_type OrderCountType;
+BEGIN
+  v_order_count_type := GetOrderCountForClient(1);
+  DBMS_OUTPUT.PUT_LINE('Liczba zamówień dla klienta o ID ' || v_order_count_type.client_id || ': ' || v_order_count_type.order_count);
+END;
+/
+
+
+

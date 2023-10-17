@@ -1,0 +1,5 @@
+Kwiaciarnia internetowa
+
+Kwiaciarnia internetowa potrzebuje bazy danych służącej do ewidencji zamówień. Firma oferuje dostawy gotowych bukietów lub kwiatów w zestawie do samodzielnego stworzenia bukietu. Każdy kwiat ma określony gatunek oraz cenę. Cena bukietu i zestawu to cena wchodzących w jego skład kwiatów. Każdy bukiet i zestaw składają się z wielu kwiatów. Cena kwiatu w zestawie i w bukiecie jest inna. Klient może zamówić zarówno bukiet jak i zestaw. Baza danych musi przechowywać dane dotyczące zamówienia: datę złożenia zamówienia, przewidywaną datę realizacji, dane klienta (imię, nazwisko, dane kontaktowe, adres), zamówione produkty. Każde zamówienie ma przypisany wygenerowany, unikalny kod rabatowy, który może być użyty tylko raz. Jedno zamówienie może obejmować wiele bukietów lub zestawów do samodzielnego wykonania.
+
+

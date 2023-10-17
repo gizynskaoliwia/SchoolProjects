@@ -1,0 +1,93 @@
+-- Procedura z parametrami wyjściowymi z użyciem rozszerzenia CTE (common table expression)
+
+-- Procedura ma obliczać sumę cen bukietów dla danego zamówienia i przypisywać wynik do parametru wyjściowego @TotalPrice. 
+
+CREATE PROCEDURE GetTotalPrice
+@OrderId INT,
+@TotalPrice DECIMAL(10, 2) OUTPUT
+AS
+BEGIN
+;WITH CTE AS (
+SELECT SUM(Bukiet.CenaBukietu) AS TotalPrice
+FROM ZamowienieBukiet
+JOIN Bukiet ON ZamowienieBukiet.Bukiet_ID = Bukiet.ID
+WHERE ZamowienieBukiet.Zamowienie_ID = @OrderId
+)
+SELECT @TotalPrice = TotalPrice FROM CTE;
+END;
+
+DECLARE @OrderId INT;
+DECLARE @TotalPrice DECIMAL(10, 2);
+
+SET @OrderId = 1;
+
+EXEC GetTotalPrice @OrderId, @TotalPrice OUTPUT;
+
+PRINT 'Total Price: ' + CAST(@TotalPrice AS VARCHAR(10));
+
+
+
+
+-- Wyzwalacz (Trigger) z obsługą wyjątków 
+
+-- Wyzwalacz, który będzie reagować na operacje INSERT i UPDATE. 
+-- W przypadku pomyślnego wykonania operacji, pole Data w tabeli Zamowienie ma zostać zaktualizowane na bieżącą datę dla wierszy, które zostały wstawione lub zaktualizowane. 
+-- W innym przypadku będzie poazywał się błąd.
+
+CREATE TRIGGER UpdateOrderDate
+ON Zamowienie
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    UPDATE Zamowienie
+    SET Data = GETDATE()
+    FROM inserted
+    WHERE Zamowienie.ID = inserted.ID;
+
+    IF NOT EXISTS (SELECT * FROM Zamowienie WHERE ID IN (SELECT ID FROM inserted))
+    BEGIN
+        RAISERROR('Nie ma takiego zamowienia', 11, -1);
+    END;
+END;
+
+
+INSERT INTO Zamowienie (ID, Data, Klient_ID, PrzewidywanaDataRealizacji, KodRabatowy_ID)
+VALUES (17, '2023-05-30 10:00:00', 7, '2023-06-05 14:00:00', 5);
+
+SELECT ID, Data
+FROM Zamowienie
+WHERE ID = 17;
+
+-- Błąd
+UPDATE Zamowienie
+SET Klient_ID = 4
+WHERE ID = 200;
+
+
+
+
+-- Funkcja tabelaryczna z użyciem rozszerzenia CTE (common table expression):
+
+--Funkcja tabelaryczna, która przyjmuje identyfikator klienta (@KlientId) i zwraca tabelę zawierającą bukiety przypisane do tego klienta. 
+
+CREATE FUNCTION GetBukietyByKlient
+(
+    @KlientId INT
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH CTE AS (
+        SELECT ZamowienieBukiet.*, Bukiet.*
+        FROM ZamowienieBukiet
+        JOIN Bukiet ON ZamowienieBukiet.Bukiet_ID = Bukiet.ID
+        JOIN Zamowienie ON ZamowienieBukiet.Zamowienie_ID = Zamowienie.ID
+        WHERE Zamowienie.Klient_ID = @KlientId
+    )
+    SELECT *
+    FROM CTE
+);
+
+SELECT *
+FROM s999759.GetBukietyByKlient(7);
